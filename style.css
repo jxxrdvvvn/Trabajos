@@ -1,0 +1,335 @@
+/* ==========================================================================
+   NEONMATCH // HOJA DE ESTILOS PREMIUM UNIFICADA
+   Estilo: Cyberpunk Glassmorphism con Corrección de Hitbox 3D
+   ========================================================================== */
+
+:root {
+    --bg-main: #0a0a12;
+    --panel-bg: rgba(20, 20, 35, 0.65);
+    --border-neon: #00f0ff;
+    --accent-neon: #ff007f;
+    --success-neon: #39ff14;
+    --text-main: #e2e8f0;
+    --text-muted: #64748b;
+    --font-family: 'Courier New', Courier, monospace;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    background-color: var(--bg-main);
+    color: var(--text-main);
+    font-family: system-ui, -apple-system, sans-serif;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow-x: hidden;
+}
+
+/* Capa decorativa de fondo aislada */
+.app-background {
+    position: fixed;
+    top: 0; 
+    left: 0; 
+    width: 100%; 
+    height: 100%;
+    background: radial-gradient(circle at 50% 50%, #1e1e38 0%, #0a0a12 100%);
+    z-index: -1;
+}
+
+/* Contenedor de la Aplicación */
+.game-wrapper {
+    width: 100%;
+    max-width: 900px;
+    padding: 24px;
+}
+
+/* Panel de Control de Cabecera (Header) */
+.game-header {
+    background: var(--panel-bg);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-bottom: 3px solid var(--border-neon);
+    padding: 24px;
+    border-radius: 12px 12px 0 0;
+    margin-bottom: 20px;
+}
+
+.glitch-text {
+    font-size: 2rem;
+    font-weight: 900;
+    letter-spacing: 4px;
+    color: #fff;
+    text-shadow: 0 0 10px var(--border-neon);
+}
+
+.subtitle {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    letter-spacing: 2px;
+    margin-top: 4px;
+}
+
+/* Panel de Métricas / Marcadores */
+.metrics-panel {
+    display: flex;
+    gap: 16px;
+    margin: 20px 0;
+}
+
+.metric-box {
+    flex: 1;
+    background: rgba(0, 0, 0, 0.4);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    padding: 12px;
+    border-radius: 6px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.metric-box.highlighted {
+    border-color: var(--accent-neon);
+}
+
+.metric-label {
+    font-size: 0.65rem;
+    color: var(--text-muted);
+    letter-spacing: 1px;
+    margin-bottom: 4px;
+}
+
+.metric-value {
+    font-size: 1.5rem;
+    font-weight: 700;
+    font-family: var(--font-family);
+}
+
+/* Controles de Configuración y Navegación */
+.action-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 16px;
+}
+
+.control-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    font-size: 0.8rem;
+    color: var(--text-muted);
+}
+
+.custom-select, .btn {
+    height: 42px;
+    background: #131326;
+    border: 1px solid #2d2d44;
+    color: white;
+    padding: 0 16px;
+    border-radius: 6px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.custom-select:focus, .btn:hover {
+    border-color: var(--border-neon);
+    box-shadow: 0 0 10px rgba(0, 240, 255, 0.2);
+    outline: none;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #00f0ff 0%, #0072ff 100%);
+    color: #0a0a12;
+    border: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 20px rgba(0, 240, 255, 0.4);
+}
+
+kbd {
+    background: rgba(0,0,0,0.3);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 0.75rem;
+}
+
+/* ==========================================================================
+   ARQUITECTURA DEL TABLERO Y CARTAS SEMÁNTICAS (CORREGIDO)
+   ========================================================================== */
+
+.grid-board {
+    display: grid;
+    gap: 16px;
+    perspective: 1200px; /* Brinda profundidad de campo real al giro 3D */
+}
+
+/* El Botón de la Carta (Contenedor e Interfaz de Clic Rígida) */
+.card {
+    aspect-ratio: 1;
+    position: relative;
+    cursor: pointer;
+    background: transparent;
+    border: none;
+    padding: 0;
+    width: 100%;
+    display: block;
+    overflow: visible; /* Impide deformaciones de la hitbox virtual en CSS grid */
+    
+    transform-style: preserve-3d;
+    transition: transform 0.5s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+.card:focus {
+    outline: none;
+}
+
+/* Activadores de giro */
+.card.flipped, .card.matched {
+    transform: rotateY(180deg);
+}
+
+/* Caras Absolutas de la Carta (Evitan desalineaciones físicas) */
+.card-face {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    
+    /* Esconde la cara que queda de espaldas al usuario */
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+    
+    /* CRÍTICO: Evita que el emoji se robe el foco del mouse desfasando el puntero */
+    pointer-events: none; 
+}
+
+/* Reverso de la carta (Boca abajo - Estado inicial) */
+.card-back {
+    background: radial-gradient(circle at center, #1b1b3a 0%, #111126 100%);
+    border: 2px solid #2d2d54;
+    box-shadow: inset 0 0 15px rgba(0,0,0,0.6);
+    transform: rotateY(0deg); /* Define el plano base estricto */
+}
+
+.card:hover .card-back {
+    border-color: var(--border-neon);
+    box-shadow: 0 0 15px rgba(0, 240, 255, 0.3), inset 0 0 15px rgba(0,0,0,0.6);
+}
+
+/* Anverso de la carta (Boca arriba - Revelada) */
+.card-front {
+    background: #161630;
+    border: 2px solid var(--border-neon);
+    color: var(--border-neon);
+    box-shadow: 0 0 20px rgba(0, 240, 255, 0.15);
+    transform: rotateY(180deg); /* Nace al revés para enderezarse al girar el botón */
+}
+
+/* Estado de Pareja Encontrada */
+.card.matched .card-front {
+    border-color: var(--success-neon);
+    color: var(--success-neon);
+    background: rgba(57, 255, 20, 0.05);
+    box-shadow: 0 0 25px rgba(57, 255, 20, 0.3);
+    animation: matchPulse 0.4s ease-out;
+}
+
+/* ==========================================================================
+   PANTALLAS DE INTERFAZ DE USUARIO AVANZADAS (MODAL DE VICTORIA)
+   ========================================================================== */
+
+.modal-overlay {
+    position: fixed;
+    top: 0; 
+    left: 0; 
+    width: 100%; 
+    height: 100%;
+    background: rgba(5, 5, 10, 0.85);
+    backdrop-filter: blur(8px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 100;
+    opacity: 1;
+    transition: opacity 0.3s ease;
+}
+
+.modal-overlay.hidden {
+    opacity: 0;
+    pointer-events: none;
+}
+
+.modal-card {
+    background: #111126;
+    border: 2px solid var(--accent-neon);
+    box-shadow: 0 0 40px rgba(255, 0, 127, 0.25);
+    padding: 40px;
+    border-radius: 16px;
+    text-align: center;
+    max-width: 400px;
+    width: 90%;
+}
+
+.modal-desc {
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    margin-top: 6px;
+}
+
+.modal-stats {
+    background: rgba(0,0,0,0.3);
+    padding: 16px;
+    border-radius: 8px;
+    margin: 24px 0;
+}
+
+.stat {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 8px;
+}
+
+.stat:last-child { 
+    margin-bottom: 0; 
+}
+
+.btn-glow {
+    background: var(--accent-neon);
+    color: white;
+    border: none;
+    width: 100%;
+}
+
+.btn-glow:hover {
+    box-shadow: 0 0 25px var(--accent-neon);
+    transform: scale(1.02);
+}
+
+/* ==========================================================================
+   ANIMACIONES CLAVE (KEYFRAMES)
+   ========================================================================== */
+
+@keyframes matchPulse {
+    0% { transform: rotateY(180deg) scale(1); }
+    50% { transform: rotateY(180deg) scale(1.08); }
+    100% { transform: rotateY(180deg) scale(1); }
+}

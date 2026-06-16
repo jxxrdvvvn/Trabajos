@@ -1,0 +1,93 @@
+// --- ESTADO CENTRALIZADO Y SEGURO (ÚNICA FUENTE DE VERDAD) ---
+let estadoJuego = {
+    cartas: [],            // Array de objetos { emoji: '🍎', encontrada: false }
+    indicesSeleccionados: [], // Reemplaza a 'volteadas'
+    tableroBloqueado: false
+};
+
+const contenedorTablero = document.getElementById('tablero');
+
+/**
+ * 3. ARQUITECTURA EFICIENTE: Delegación de Eventos
+ * En lugar de un listener por carta, asignamos UN SOLO listener al contenedor padre.
+ */
+contenedorTablero.addEventListener('click', (evento) => {
+    // Buscamos si el elemento clickeado es una carta (o está dentro de una)
+    const tarjetaDom = evento.target.closest('.carta');
+    
+    // Cláusula de guardia: salir si no es una carta o el tablero está congelado
+    if (!tarjetaDom || estadoJuego.tableroBloqueado) return;
+
+    const indice = Number(tarjetaDom.dataset.indice);
+    procesarSeleccionCarta(tarjetaDom, indice);
+});
+
+/**
+ * LÓGICA DE NEGOCIO Y MITIGACIÓN DE BUGS
+ */
+function procesarSeleccionCarta(tarjetaDom, indice) {
+    const cartaData = estadoJuego.cartas[indice];
+
+    // 1. BUG FUNCIONAL FIX: Impedir seleccionar cartas ya encontradas o la misma carta dos veces
+    if (cartaData.encontrada || estadoJuego.indicesSeleccionados.includes(indice)) {
+        return; 
+    }
+
+    // Volteo visual y registro en el estado
+    tarjetaDom.textContent = cartaData.emoji;
+    estadoJuego.indicesSeleccionados.push(indice);
+
+    // Evaluar turno al tener 2 cartas seleccionadas
+    if (estadoJuego.indicesSeleccionados.length === 2) {
+        estadoJuego.tableroBloqueado = true; // 1. BUG FUNCIONAL FIX: Bloqueo de clics rápidos
+        verificarPareja();
+    }
+}
+
+function verificarPareja() {
+    const [idxA, idxB] = estadoJuego.indicesSeleccionados;
+    const cartaA = estadoJuego.cartas[idxA];
+    const cartaB = estadoJuego.cartas[idxB];
+    const divs = contenedorTablero.children;
+
+    // 3. ARQUITECTURA FIX: Comparamos datos puros del estado (JS), NO el texto del DOM
+    if (cartaA.emoji === cartaB.emoji) {
+        // Combinación Exitosa
+        cartaA.encontrada = cartaB.encontrada = true;
+        
+        // Estilos visuales de acierto
+        divs[idxA].classList.add('matched');
+        divs[idxB].classList.add('matched');
+
+        estadoJuego.indicesSeleccionados = [];
+        estadoJuego.tableroBloqueado = false; // Liberación inmediata
+    } else {
+        // Fallo: Espera sincronizada con la animación CSS
+        setTimeout(() => {
+            divs[idxA].textContent = '';
+            divs[idxB].textContent = '';
+            
+            estadoJuego.indicesSeleccionados = [];
+            estadoJuego.tableroBloqueado = false; // Liberación tras ocultar las cartas
+        }, 800);
+    }
+}
+
+/**
+ * 2. SEGURIDAD FIX: Mitigación de vulnerabilidades XSS
+ * Sanitización estricta del input del usuario mediante propiedades nativas seguras.
+ */
+function mostrarPantallaVictoria(nombreJugador) {
+    const contenedorMensaje = document.getElementById('mensaje-victoria');
+    
+    // INSEGURO (Código original de IA):
+    // contenedorMensaje.innerHTML = `<p>¡Ganaste, ${nombreJugador}!</p>`;
+
+    // SEGURO: Usar textContent o crear nodos de texto explícitos
+    const parrafo = document.createElement('p');
+    parrafo.textContent = `¡Felicidades por sincronizar el sistema, ${nombreJugador}!`; 
+    // textContent neutraliza cualquier etiqueta <script> o HTML inyectada convirtiéndola en texto plano.
+
+    contenedorMensaje.innerHTML = ''; // Limpieza segura de contenido viejo estático
+    contenedorMensaje.appendChild(parrafo);
+}

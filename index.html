@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Memorize / Juego de meroria</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <span class="app-background" aria-hidden="true"></span>
+
+    <main class="game-wrapper">
+        
+        <header class="game-header">
+            <hgroup class="brand">
+                <h1 class="glitch-text" data-text="NEON_MATCH">Memorize</h1>
+                <p class="subtitle">SISTEMA DE ENTRENAMIENTO COGNITIVO</p>
+            </hgroup>
+            
+            <section class="metrics-panel" aria-label="Tablero de Rendimiento">
+                <div class="metric-box">
+                    <span class="metric-label">MOVIMIENTOS</span>
+                    <output id="moves-counter" class="metric-value">00</output>
+                </div>
+                <div class="metric-box highlighted">
+                    <span class="metric-label">RACHA / COMBO</span>
+                    <output id="combo-counter" class="metric-value">x1</output>
+                </div>
+                <div class="metric-box">
+                    <span class="metric-label">RECORD</span>
+                    <output id="best-score" class="metric-value">--</output>
+                </div>
+            </section>
+            
+            <nav class="action-bar" aria-label="Controles del juego">
+                <div class="control-group">
+                    <label for="difficulty">DIFICULTAD</label>
+                    <select id="difficulty" class="custom-select">
+                        <option value="4">MATRIZ 2x4 (FÁCIL)</option>
+                        <option value="8" selected>MATRIZ 4x4 (NORMAL)</option>
+                        <option value="12">MATRIZ 4x6 (EXPERTO)</option>
+                    </select>
+                </div>
+                <button id="reset-btn" class="btn btn-primary">
+                    REINICIAR <kbd>R</kbd>
+                </button>
+            </nav>
+        </header>
+
+        <section class="board-container" aria-label="Tablero de juego">
+            <div id="game-board" class="grid-board"></div>
+        </section>
+    </main>
+
+    <article id="victory-screen" class="modal-overlay hidden" aria-modal="true" role="dialog">
+        <div class="modal-card">
+            <header>
+                <h2>NIVEL COMPLETADO</h2>
+                <p class="modal-desc">El sistema ha sido sincronizado con éxito.</p>
+            </header>
+            
+            <section class="modal-stats">
+                <div class="stat">
+                    <span>Movimientos Totales:</span>
+                    <strong id="final-moves">0</strong>
+                </div>
+                <div class="stat">
+                    <span>Máximo Combo:</span>
+                    <strong id="final-combo">x1</strong>
+                </div>
+            </section>
+            
+            <footer>
+                <button id="play-again-btn" class="btn btn-glow">INICIAR NUEVA SESIÓN</button>
+            </footer>
+        </div>
+    </article>
+
+    <script src="script.js"></script>
+</body>
+</html>
